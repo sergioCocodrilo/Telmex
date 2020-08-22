@@ -32,34 +32,34 @@ def s12_listen(ser):
     """
     output_ended = False
     s12_state = None
-    comment = ""
-    while not output_ended:
-        for line in ser.readlines():
-            print(line[:-1].decode("ascii"))
-            if b">" in line:
-                output_ended = True 
-                s12_state = 0
-            elif b"<" in line:
-                output_ended = True 
-                s12_state = 1
-            elif b"COMMENT" in line:
-                comment = line[16:-2].decode("ascii")
-    return (s12_state, comment)
+    with open("data/output/pares_libres.txt", "a+") as out_f:
+        while not output_ended:
+            for line in ser.readlines():
+                print(line[:-1].decode("ascii"))
+                if b">" in line:
+                    output_ended = True 
+                    s12_state = 0
+                elif b"<" in line:
+                    output_ended = True 
+                    s12_state = 1
+                elif b"NOTASS" in line:
+                    out_f.write(line[:-1].decode("ascii") + "\n")
+    return (s12_state)
 
 def estado_de_tablillas_por_archivo():
     # Get the list files. They should be in the data/input directory
     files = listdir('data/input/')
     print('Selecciona tu archivo, debe estar en la carpeta data/input/ y ser del tipo')
     [print('\t', index + 1, ':', f) for index, f in enumerate(files)]
-    f = csv_files[int(input('\t Archivo: ')) - 1]
+    f = files[int(input('\t Archivo: ')) - 1]
     print('Archivo seleccionado:', f)
 
     # Get the list of modules to check
     modules_to_check = []
     with open('data/input/' + f, 'r') as in_file:
         for l in in_file:
-            if l.startswith("H'"):
-                modules_to_check.append(l[2:6])
+            modules_to_check.append(l[:-1])
+    return modules_to_check
 
 def estado_de_todas_las_tablillas():
     pass
@@ -68,17 +68,13 @@ def consultar_tablilla(tablillas):
     # Query the S12
     ser.write('\x1b'.encode("ascii"))
 
-    while s12_listen(ser)[0] == 0:
+    while s12_listen(ser) == 0:
         ser.write('MM\r\n'.encode('ascii'))
 
     for tablilla in tablillas:
         ser.write(("157:EN=H'" + tablilla + '.\r\n').encode('ascii'))
         while True:
-            state, comment = s12_listen(ser)
-            '''
-            if comment != "":
-                module_state.append((module, comment))
-            '''
+            state = s12_listen(ser)
             if state == 1:
                 break
             else:
@@ -98,11 +94,14 @@ if __name__ == "__main__":
 
     user_choice = None
     while user_choice not in [0, 1, 2]:
-        user_choice = int(input("\tOpción"))
+        user_choice = int(input("\tOpción: "))
+
+    tablillas = []
 
     if user_choice == 0:
         quit()
     elif user_choice == 1:
-        estado_de_tablillas_por_archivo()
+        tablillas = estado_de_tablillas_por_archivo()
     else:
         estado_de_todas_las_tablillas()
+    consultar_tablilla(tablillas)
