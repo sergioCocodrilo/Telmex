@@ -6,10 +6,10 @@ import serial
 import s12_commands as s12
 
 def connect():
-    """Connects to serial through USB"""
+    """Connects to serial through SERIAL"""
     ser = serial.Serial()
     # parameters
-    ser.port = '/dev/ttyUSB0'
+    ser.port = '/dev/ttyS0'
     ser.baudrate =  9600
     ser.bytesize = serial.EIGHTBITS
     ser.parity = serial.PARITY_NONE
@@ -18,7 +18,7 @@ def connect():
     try:
         ser.open()
     except:
-        ser.port = '/dev/ttyUSB1'
+        ser.port = '/dev/ttyS1'
         ser.open()
     if ser.isOpen():
         return ser

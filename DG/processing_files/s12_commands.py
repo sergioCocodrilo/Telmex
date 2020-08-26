@@ -41,7 +41,7 @@ def start_backup():
 
 def change_multiple_modules():
     commands = []
-    with open("Input_lists/cambio_de_dispositivo", "r") as f:
+    with open("data/input/cambio_de_dispositivo", "r") as f:
         next(f)
         try:
             for line in f:
