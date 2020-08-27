@@ -6,7 +6,7 @@ class S12Connection:
     def __init__(self):
         self.ser = serial.Serial()
         # parameters
-        self.ser.port = '/dev/ttyUSB0'
+        self.ser.port = '/dev/ttyS0'
         self.ser.baudrate =  9600
         self.ser.bytesize = serial.EIGHTBITS
         self.ser.parity = serial.PARITY_NONE
@@ -15,7 +15,7 @@ class S12Connection:
         try:
             self.ser.open()
         except:
-            self.ser.port = '/dev/ttyUSB1'
+            self.ser.port = '/dev/ttyS1'
             self.ser.open()
         if self.ser.isOpen():
             self.status = "connected"
@@ -26,11 +26,11 @@ class S12Connection:
         """Send commands to server, commands should be an input list"""
         for command in commands:
             self.ser.write('\x1b'.encode("ascii"))
-            s12_listen(ser)
+            self.listen()
             self.ser.write(b"MM\r\n")
-            s12_listen(ser)
+            self.listen()
             self.ser.write(command.encode("ascii") + b"\r\n")
-            response = s12_listen(ser)
+            response = self.listen()
             """ AGREGAR UN BREAK SI LA PRIMERA INSTRUCCIÓN FALLA.
             NO TIENE SENTIDO TRATAR DE EJECUTAR LA SIGUIENTE,
             TAMBIÉN FALLARÁ PERO EL SISTEMA NO RESONDE."""
@@ -44,7 +44,7 @@ class S12Connection:
             server_response.extend(new_lines)
             for line in new_lines:
                 if verbose:
-                    print(line)
+                    print(line.decode("ascii"))
                 if b"<" in line or b">" in line:
                     output_ended = True 
         return server_response
