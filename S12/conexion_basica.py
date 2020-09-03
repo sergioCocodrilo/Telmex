@@ -2,6 +2,9 @@
 Raw connection to S12. Just like Hycon.
 """
 import serial
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 def connect():
     """Connects to serial through USB"""
@@ -25,23 +28,14 @@ def connect():
 
 def s12_listen(ser):
     """Listens for the answer of the S12 and returns the result"""
-    # logging all outputs
-    try:
-        log_file = open('data/output/s12_raw.log', 'a')
-    except:
-        print('Error en la estructura de los archivos, descarga de nuevo el proyecto.')
-        print('Para descargarlo: git clone https://github.com/sergioCocodrilo/S12_raw.git')
-        quit()
     output_ended = False
     while not output_ended:
         for line in ser.readlines():
             print(line[:-1].decode("ascii"))
-            log_file.write(line.decode('ascii'))
             if b"<" in line or b">" in line:
                 output_ended = True 
-    log_file.close()
-    
-if __name__ == "__main__":
+
+def main():
     ser = connect()
     if not ser:
         print('Imposible establecer conexión.')
@@ -52,3 +46,6 @@ if __name__ == "__main__":
         s12_listen(ser)
         usr_input = input()
         ser.write((usr_input.upper() + '\r\n').encode("ascii"))
+    
+if __name__ == "__main__":
+    main()
