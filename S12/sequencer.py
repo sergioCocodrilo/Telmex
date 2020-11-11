@@ -28,7 +28,7 @@ class Sequencer:
         if ser.isOpen():
             self.ser = ser
             self.ser.write('\x1b'.encode("ascii"))  # get the S12 ready for macro
-            self.s12_listen(self)
+            self.s12_listen()
         else:
             print("Could not connect to either ttys0 nor to ttyS1")
             return None
@@ -54,11 +54,11 @@ class Sequencer:
     def exec_command(self, command):
         command += '\r\n'
         if self.s12_state == 0:
-            get_ready_for_command(self)
+            self.get_ready_for_command()
         self.ser.write(command.encode('ascii'))
 
     def get_ready_for_command(self):
         if self.s12_state != 1:
             while self.s12_state == 0:  # ready for macro
-                ser.write('MM\r\n'.encode('ascii'))
+                self.ser.write('MM\r\n'.encode('ascii'))
 
